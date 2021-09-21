@@ -6,7 +6,10 @@ import { Url } from '../../types';
 
 const types = gql`
 	type Query {
-		getResources: [Repository]
+		getRepos: [Repository]
+	}
+	type Mutation {
+		addRepo(url: String!): String
 	}
 
 	type Topic {
@@ -28,13 +31,13 @@ const types = gql`
 		stargazerCount: Int
 		repositoryTopics: NestedTopic
 		openGraphImageUrl: String
-		uodatedAt: String
+		updatedAt: String
 	}
 `;
 
 const resolvers = {
 	Query: {
-		getResources: async (_ = {}, { url }: Url) => {
+		getRepos: async () => {
 			const supabase = new Supabase();
 
 			const { data, error: err } = await supabase.getAll('resources');
@@ -47,8 +50,24 @@ const resolvers = {
 					variables: { owner, name },
 				});
 			});
+
 			const resources = await Promise.all(promises);
-			return resources;
+			return resources.map((el) => el.repository);
+		},
+	},
+	Mutation: {
+		addRepo: async (_ = {}, { url }: Url) => {
+			const supabase = new Supabase();
+
+			const created_at: string = new Date(Date.now()).toISOString();
+			const { error } = await supabase.insert('resources', {
+				created_at: created_at,
+				url,
+			});
+
+			return error
+				? `Err: ${error.message}`
+				: 'Thanks for the submission.';
 		},
 	},
 };

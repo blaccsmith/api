@@ -15,5 +15,5 @@ export interface Repository {
 }
 
 export interface Url {
-    url: string
+	url: string;
 }
