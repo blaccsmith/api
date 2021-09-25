@@ -42,8 +42,10 @@ const resolvers = {
 
 			const { data, error: err } = await supabase.getAll('resources');
 
+			const repos = data?.filter((el) => el.approved);
+
 			const gql = new GraphQL();
-			const promises = (data as any[]).map(async (repo) => {
+			const promises = (repos as any[]).map(async (repo) => {
 				const [, owner, name] = repo.url.substring(8).split('/');
 				return await gql.runQuery({
 					query: reposQuery,
