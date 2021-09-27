@@ -4,6 +4,12 @@ import {
 	SupabaseClient,
 } from '@supabase/supabase-js';
 
+interface UpdateParams {
+	table: string;
+	newData: any;
+	where: [string, any];
+}
+
 export default class Supabase {
 	client: SupabaseClient;
 
@@ -29,6 +35,15 @@ export default class Supabase {
 		const { error, data }: PostgrestResponse<any> = await this.client
 			.from(table)
 			.select('*');
+
+		return { error, data };
+	}
+
+	async update({ table, newData, where }: UpdateParams) {
+		const { data, error }: PostgrestResponse<any> = await this.client
+			.from(table)
+			.update(newData)
+			.eq(where[0], where[1]);
 
 		return { error, data };
 	}
