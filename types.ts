@@ -20,3 +20,7 @@ export interface Url {
 export interface RepoReq {
 	filter: 'pending' | 'approved';
 }
+export interface ReviewRepoReq {
+	approved: boolean;
+	url: string;
+}

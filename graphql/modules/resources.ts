@@ -2,7 +2,7 @@ import GraphQL from '@/clients/graphql';
 import { reposQuery } from '@/clients/graphql/queries';
 import Supabase from '@/clients/supabase';
 import { createModule, gql } from 'graphql-modules';
-import { RepoReq, Url } from '../../types';
+import { RepoReq, ReviewRepoReq, Url } from '../../types';
 
 const types = gql`
 	type Query {
@@ -10,6 +10,7 @@ const types = gql`
 	}
 	type Mutation {
 		addRepo(url: String!): String
+		reviewRepo(url: String!, approved: Boolean!): String
 	}
 
 	type Topic {
@@ -72,6 +73,17 @@ const resolvers = {
 			return error
 				? `Err: ${error.message}`
 				: 'Thanks for the submission.';
+		},
+		reviewRepo: async (_ = {}, { approved, url }: ReviewRepoReq) => {
+			const supabase = new Supabase();
+
+			const { data, error } = await supabase.update({
+				table: 'resources',
+				newData: { approved, pending: false },
+				where: ['url', url],
+			});
+
+			return !data ? `Err: ${error?.message}` : 'Thanks for the review.';
 		},
 	},
 };
