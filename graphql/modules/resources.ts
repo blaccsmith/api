@@ -2,14 +2,15 @@ import GraphQL from '@/clients/graphql';
 import { reposQuery } from '@/clients/graphql/queries';
 import Supabase from '@/clients/supabase';
 import { createModule, gql } from 'graphql-modules';
-import { Url } from '../../types';
+import { RepoReq, ReviewRepoReq, Url } from '../../types';
 
 const types = gql`
 	type Query {
-		getRepos: [Repository]
+		getRepos(filter: String!): [Repository]
 	}
 	type Mutation {
 		addRepo(url: String!): String
+		reviewRepo(url: String!, approved: Boolean!): String
 	}
 
 	type Topic {
@@ -37,13 +38,17 @@ const types = gql`
 
 const resolvers = {
 	Query: {
-		getRepos: async () => {
+		getRepos: async (_ = {}, { filter }: RepoReq) => {
 			const supabase = new Supabase();
 
-			const { data, error: err } = await supabase.getAll('resources');
+			const { data } = await supabase.getAll('resources');
+
+			const repos = data?.filter((el) =>
+				filter === 'approved' ? el.approved : el.pending
+			);
 
 			const gql = new GraphQL();
-			const promises = (data as any[]).map(async (repo) => {
+			const promises = (repos as any[]).map(async (repo) => {
 				const [, owner, name] = repo.url.substring(8).split('/');
 				return await gql.runQuery({
 					query: reposQuery,
@@ -68,6 +73,17 @@ const resolvers = {
 			return error
 				? `Err: ${error.message}`
 				: 'Thanks for the submission.';
+		},
+		reviewRepo: async (_ = {}, { approved, url }: ReviewRepoReq) => {
+			const supabase = new Supabase();
+
+			const { data, error } = await supabase.update({
+				table: 'resources',
+				newData: { approved, pending: false },
+				where: ['url', url],
+			});
+
+			return !data ? `Err: ${error?.message}` : 'Thanks for the review.';
 		},
 	},
 };

@@ -17,3 +17,10 @@ export interface Repository {
 export interface Url {
 	url: string;
 }
+export interface RepoReq {
+	filter: 'pending' | 'approved';
+}
+export interface ReviewRepoReq {
+	approved: boolean;
+	url: string;
+}
