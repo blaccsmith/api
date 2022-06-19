@@ -44,8 +44,26 @@ export default async function handler(
 			member.roles.add(process.env.SPECTATOR_ROLE_ID as string);
 		});
 
+		// Mod-only
+		// Mod-meeting
+		// Connect
+		// CnC
+		// Main Stage
+
+		const keptChannels = [
+			'769625189645811784',
+			'970878995254116372',
+			'938218242260996156',
+			'827299885929332797',
+			'841394770130632734',
+		];
+
 		// Delete all channels
-		const dc = readyClient.channels.cache.map(c => c.delete());
+		const dc = readyClient.channels.cache.map(c => {
+			if (!keptChannels.includes(c.id)) {
+				c.delete();
+			}
+		});
 
 		// New channels
 		const newChannels = [
@@ -63,7 +81,7 @@ export default async function handler(
 			'career-opportunities',
 		];
 
-		// Create community guildlines open to all members
+		// Create community guildlines with no permissions
 		guild?.channels.create('community-guidelines', {
 			type: 'GUILD_TEXT',
 		});
