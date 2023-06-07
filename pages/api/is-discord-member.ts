@@ -19,7 +19,7 @@ export default async function handler(
     const searchResults = await response.json();
 
     const isMember = searchResults.some(
-      (result) => result.user.username === username
+      (result: any) => result.user.username === username
     );
 
     res.status(200).json(isMember);
