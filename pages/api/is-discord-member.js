@@ -1,8 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
+  req,
+  res
 ) {
   if (req.method === "GET") {
     const username = req.query.username;
@@ -19,7 +17,7 @@ export default async function handler(
     const searchResults = await response.json();
 
     const isMember = searchResults.some(
-      (result: any) => result.user.username === username
+      (result) => result.user.username === username
     );
 
     res.status(200).json(isMember);
